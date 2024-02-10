@@ -39,26 +39,72 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
         joinButton.interactable = true;
         connectionInfoText.text = "서버에 연결됨";
-
+             
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         //마스터 서버 접속 실패 시 자동 실행
+        //연결이 끊어진 이유는 DisconnectCause로 제공
+        Debug.Log("포톤 서버 접속 실패");
+
+        joinButton.interactable = false;
+        connectionInfoText.text = "서버와 연결되지 않음\n접속 시도 중";
+
+        //마스터 서버로의 재접속 시도
+        PhotonNetwork.ConnectUsingSettings();
     }
 
     public void Connect()
     {
         //룸 접속 시도
+        //매치메이킹 서버를 통해 빈 무작위 룸에 접속을 시도
+        Debug.Log("랜덤 룸에 접속을 시도");
+
+        joinButton.interactable = false;
+
+        if (PhotonNetwork.IsConnected)
+        {
+            //포톤 서버에 연결된 상태라면 랜덤 룸에 접속 시도
+            connectionInfoText.text = "룸에 접속 중";
+            PhotonNetwork.JoinRandomRoom();
+        }
+        else
+        {
+            //포톤 서버에 연결되지 않았다면 포톤 서버로 연결 시도
+            connectionInfoText.text = "서버와 연결되지 않음\n접속 시도 중";
+            PhotonNetwork.ConnectUsingSettings();
+        }
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         //(빈 방이 없어)랜덤 룸 참가에 실패한 경우 자동 실행
-    }
+        Debug.Log("비어있는 방 없음. 새로운 방 생성");
+        connectionInfoText.text = "새로운 방을 생성합니다.";
 
+        //룸 속성 설정
+        RoomOptions options = new RoomOptions();
+        options.IsOpen = true;
+        options.IsVisible = true;
+        options.MaxPlayers = 4;
+
+        //새로운 룸 생성
+        //생성할 룸 이름을 string 타입, 룹 옵션을 RoomOptions 타입으로 받는다
+        //생성된 룸은 리슨 서버 방식으로 동작하며 룸을 생성한 클라이언트가 호스트 역할을 맡는다
+        PhotonNetwork.CreateRoom("room1", options);
+    }
+       
     public override void OnJoinedRoom()
     {
         //룸에 참가 완료된 경우 자동 실행
+        Debug.Log(PhotonNetwork.NickName + "방 입장 완료");
+
+        //플레이어의 닉네임 설정
+        PhotonNetwork.NickName = userName.text;
+        connectionInfoText.text = PhotonNetwork.NickName + " 입장하셨습니다.";
+
+        //룸 참가자 모두가 해당 씬을 로드하게 함
+        //PhotonNetwork.LoadLevel("Main");
     }
 }
