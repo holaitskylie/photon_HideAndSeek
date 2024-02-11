@@ -159,14 +159,20 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         //룸에 참가 완료된 경우 자동 실행
-        Debug.Log("05. 방 입장 완료");
+        Debug.Log("05. 방 입장 완료");        
 
         //플레이어의 닉네임 설정
         PhotonNetwork.NickName = userName.text;
         connectionInfoText.text = PhotonNetwork.NickName + " 입장하셨습니다.";
 
         //룸 참가자 모두가 해당 씬을 로드하게 함
-        //PhotonNetwork.LoadLevel("Main");
+        PhotonNetwork.LoadLevel("Main");
+    }
+
+    public void JoinRoom(string roomName)
+    {
+        if(PhotonNetwork.IsConnected)
+            PhotonNetwork.JoinRoom(roomName);
     }
         
 
