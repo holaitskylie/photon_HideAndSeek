@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,105 +6,197 @@ using Photon.Pun;
 using Photon.Realtime;
 
 //<summary>
-//Lobby SceneÀÌ ³×Æ®¿öÅ© ·Îºñ·Î µ¿ÀÛÇÏ´Â ½ºÅ©¸³Æ®
-//¸ÅÄ¡¸ŞÀÌÅ· ¼­¹ö¿Í ·ë Á¢¼ÓÀ» ´ã´ç
+//Lobby Sceneì´ ë„¤íŠ¸ì›Œí¬ ë¡œë¹„ë¡œ ë™ì‘í•˜ëŠ” ìŠ¤í¬ë¦½íŠ¸
+//ë§¤ì¹˜ë©”ì´í‚¹ ì„œë²„ì™€ ë£¸ ì ‘ì†ì„ ë‹´ë‹¹
 //</summary>
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
     private string gameVersion = "v1.0";
-    public InputField userName; //ÇÃ·¹ÀÌ¾î ´Ğ³×ÀÓ ¼³Á¤
-    public Text connectionInfoText; //ÇöÀç ³×Æ®¿öÅ© Á¢¼Ó »óÅÂ Ç¥½Ã
-    public Button joinButton; //¸ÅÄ¡¸ŞÀÌÅ· ¼­¹ö¸¦ ÅëÇØ ·ë¿¡ Á¢¼Ó
+
+    [Header("UI_Naming")]
+    public InputField userName; //í”Œë ˆì´ì–´ ë‹‰ë„¤ì„ ì„¤ì •
+    public InputField roomName; //ë£¸ ì´ë¦„ ì„¤ì •
+
+    public Text connectionInfoText; //í˜„ì¬ ë„¤íŠ¸ì›Œí¬ ì ‘ì† ìƒíƒœ í‘œì‹œ
+    public Button createButton; //ë¡œë¹„ì— ë£¸ì„ ë§Œë“œëŠ” ë²„íŠ¼
+
+    [Header("UI_Room List")]   
+    [SerializeField] private RoomData roomPrefab;
+    [SerializeField] private Transform scrollArea;
+    List<RoomData> roomDataList = new List<RoomData>();
+
 
     void Start()
     {
-        //°ÔÀÓ ½ÇÇà°ú µ¿½Ã¿¡ ¸¶½ºÅÍ ¼­¹ö Á¢¼Ó ½Ãµµ
-        //Á¢¼ÓÇÏ´Â µ¿¾È ·ë Á¢¼ÓÀ» ½ÃµµÇÒ ¼ö ¾øµµ·Ï Á¢¼Ó ¹öÆ° ºñÈ°¼ºÈ­
+        //ê²Œì„ ì‹¤í–‰ê³¼ ë™ì‹œì— ë§ˆìŠ¤í„° ì„œë²„ ì ‘ì† ì‹œë„
+        Debug.Log("01. ë§ˆìŠ¤í„° ì„œë²„ ì ‘ì† ì‹œë„");
 
-        //°ÔÀÓ ¹öÀü ÁöÁ¤
+        //ê²Œì„ ë²„ì „ ì§€ì •
         PhotonNetwork.GameVersion = gameVersion;
 
-        //°ÔÀÓ ¼­¹ö Á¢¼Ó
+        //ê²Œì„ ì„œë²„ ì ‘ì†
         PhotonNetwork.ConnectUsingSettings();
                 
-        joinButton.interactable = false;
-        connectionInfoText.text = "¼­¹ö Á¢¼Ó Áß";
+        //ì ‘ì†í•˜ëŠ” ë™ì•ˆ ë£¸ ì ‘ì†ì„ ì‹œë„í•  ìˆ˜ ì—†ë„ë¡ ì ‘ì† ë²„íŠ¼ ë¹„í™œì„±í™”
+        createButton.interactable = false;
+        connectionInfoText.text = "ì„œë²„ ì ‘ì† ì¤‘";
 
     }
 
     public override void OnConnectedToMaster()
     {
-        //Å¬¶óÀÌ¾ğÆ®°¡ ¸¶½ºÅÍ ¼­¹ö¿¡ ¿¬°áµÇ¸ç ¸ÅÄ¡¸ŞÀÌÅ· ÀÛ¾÷À» ¼öÇàÇÒ ÁØºñ°¡ µÇ¸é ÀÚµ¿ È£Ãâ
-        Debug.Log("Æ÷Åæ ¼­¹ö Á¢¼Ó ¼º°ø");
+        //í´ë¼ì´ì–¸íŠ¸ê°€ ë§ˆìŠ¤í„° ì„œë²„ì— ì—°ê²°ë˜ë©° ë§¤ì¹˜ë©”ì´í‚¹ ì‘ì—…ì„ ìˆ˜í–‰í•  ì¤€ë¹„ê°€ ë˜ë©´ ìë™ í˜¸ì¶œ
+        Debug.Log("02. í¬í†¤ ì„œë²„ ì ‘ì† ì„±ê³µ");
 
-        joinButton.interactable = true;
-        connectionInfoText.text = "¼­¹ö¿¡ ¿¬°áµÊ";
-             
+        createButton.interactable = true;
+        connectionInfoText.text = "ì„œë²„ì— ì—°ê²°ë¨";
+
+        //ë¡œë¹„ì— ì ‘ì†
+        PhotonNetwork.JoinLobby();             
+    }
+
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("03. ë¡œë¹„ ì ‘ì†");
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-        //¸¶½ºÅÍ ¼­¹ö Á¢¼Ó ½ÇÆĞ ½Ã ÀÚµ¿ ½ÇÇà
-        //¿¬°áÀÌ ²÷¾îÁø ÀÌÀ¯´Â DisconnectCause·Î Á¦°ø
-        Debug.Log("Æ÷Åæ ¼­¹ö Á¢¼Ó ½ÇÆĞ");
+        //ë§ˆìŠ¤í„° ì„œë²„ ì ‘ì† ì‹¤íŒ¨ ì‹œ ìë™ ì‹¤í–‰
+        //ì—°ê²°ì´ ëŠì–´ì§„ ì´ìœ ëŠ” DisconnectCauseë¡œ ì œê³µ
+        Debug.Log("02. í¬í†¤ ì„œë²„ ì ‘ì† ì‹¤íŒ¨");
 
-        joinButton.interactable = false;
-        connectionInfoText.text = "¼­¹ö¿Í ¿¬°áµÇÁö ¾ÊÀ½\nÁ¢¼Ó ½Ãµµ Áß";
+        createButton.interactable = false;
+        connectionInfoText.text = "ì„œë²„ì™€ ì—°ê²°ë˜ì§€ ì•ŠìŒ\nì ‘ì† ì‹œë„ ì¤‘";
 
-        //¸¶½ºÅÍ ¼­¹ö·ÎÀÇ ÀçÁ¢¼Ó ½Ãµµ
+        //ë§ˆìŠ¤í„° ì„œë²„ë¡œì˜ ì¬ì ‘ì† ì‹œë„
         PhotonNetwork.ConnectUsingSettings();
     }
 
     public void Connect()
     {
-        //·ë Á¢¼Ó ½Ãµµ
-        //¸ÅÄ¡¸ŞÀÌÅ· ¼­¹ö¸¦ ÅëÇØ ºó ¹«ÀÛÀ§ ·ë¿¡ Á¢¼ÓÀ» ½Ãµµ
-        Debug.Log("·£´ı ·ë¿¡ Á¢¼ÓÀ» ½Ãµµ");
+        //ë£¸ ì ‘ì† ì‹œë„
+        //ë§¤ì¹˜ë©”ì´í‚¹ ì„œë²„ë¥¼ í†µí•´ ë¹ˆ ë¬´ì‘ìœ„ ë£¸ì— ì ‘ì†ì„ ì‹œë„
+        Debug.Log("ëœë¤ ë£¸ì— ì ‘ì†ì„ ì‹œë„");
 
-        joinButton.interactable = false;
+        createButton.interactable = false;
 
         if (PhotonNetwork.IsConnected)
         {
-            //Æ÷Åæ ¼­¹ö¿¡ ¿¬°áµÈ »óÅÂ¶ó¸é ·£´ı ·ë¿¡ Á¢¼Ó ½Ãµµ
-            connectionInfoText.text = "·ë¿¡ Á¢¼Ó Áß";
+            //í¬í†¤ ì„œë²„ì— ì—°ê²°ëœ ìƒíƒœë¼ë©´ ëœë¤ ë£¸ì— ì ‘ì† ì‹œë„
+            connectionInfoText.text = "ë£¸ì— ì ‘ì† ì¤‘";
             PhotonNetwork.JoinRandomRoom();
         }
         else
         {
-            //Æ÷Åæ ¼­¹ö¿¡ ¿¬°áµÇÁö ¾Ê¾Ò´Ù¸é Æ÷Åæ ¼­¹ö·Î ¿¬°á ½Ãµµ
-            connectionInfoText.text = "¼­¹ö¿Í ¿¬°áµÇÁö ¾ÊÀ½\nÁ¢¼Ó ½Ãµµ Áß";
+            //í¬í†¤ ì„œë²„ì— ì—°ê²°ë˜ì§€ ì•Šì•˜ë‹¤ë©´ í¬í†¤ ì„œë²„ë¡œ ì—°ê²° ì‹œë„
+            connectionInfoText.text = "ì„œë²„ì™€ ì—°ê²°ë˜ì§€ ì•ŠìŒ\nì ‘ì† ì‹œë„ ì¤‘";
             PhotonNetwork.ConnectUsingSettings();
         }
     }
 
-    public override void OnJoinRandomFailed(short returnCode, string message)
+    public void MakeRoom()
     {
-        //(ºó ¹æÀÌ ¾ø¾î)·£´ı ·ë Âü°¡¿¡ ½ÇÆĞÇÑ °æ¿ì ÀÚµ¿ ½ÇÇà
-        Debug.Log("ºñ¾îÀÖ´Â ¹æ ¾øÀ½. »õ·Î¿î ¹æ »ı¼º");
-        connectionInfoText.text = "»õ·Î¿î ¹æÀ» »ı¼ºÇÕ´Ï´Ù.";
+        //createButtonì— ì—°ê²°í•˜ì—¬ ë¡œë¹„ì— ë°©ì„ ìƒì„±í•˜ëŠ” ë©”ì„œë“œ
+        Debug.Log("03. ë°© ìƒì„±í•˜ê¸°");
+        createButton.interactable = false;
 
-        //·ë ¼Ó¼º ¼³Á¤
+        //ë£¸ ì†ì„± ì„¤ì •
         RoomOptions options = new RoomOptions();
         options.IsOpen = true;
         options.IsVisible = true;
         options.MaxPlayers = 4;
 
-        //»õ·Î¿î ·ë »ı¼º
-        //»ı¼ºÇÒ ·ë ÀÌ¸§À» string Å¸ÀÔ, ·ì ¿É¼ÇÀ» RoomOptions Å¸ÀÔÀ¸·Î ¹Ş´Â´Ù
-        //»ı¼ºµÈ ·ëÀº ¸®½¼ ¼­¹ö ¹æ½ÄÀ¸·Î µ¿ÀÛÇÏ¸ç ·ëÀ» »ı¼ºÇÑ Å¬¶óÀÌ¾ğÆ®°¡ È£½ºÆ® ¿ªÇÒÀ» ¸Ã´Â´Ù
-        PhotonNetwork.CreateRoom("room1", options);
+        if (roomName.text == "")
+            roomName.text = "Room" + Random.Range(1, 100);
+
+        if (PhotonNetwork.IsConnected)
+        {
+            Debug.Log("03. " + roomName.text + "ë°© ìƒì„±");
+            PhotonNetwork.CreateRoom(roomName.text, options);
+
+            //í”Œë ˆì´ì–´ì˜ ë‹‰ë„¤ì„ ì„¤ì •
+            PhotonNetwork.NickName = userName.text;
+            connectionInfoText.text = PhotonNetwork.NickName + " ë‹˜ì´ ë°©ì„ ìƒì„±í–ˆìŠµë‹ˆë‹¤.";
+        }
+        else
+        {
+            //í¬í†¤ ì„œë²„ì— ì—°ê²°ë˜ì§€ ì•Šì•˜ë‹¤ë©´ í¬í†¤ ì„œë²„ë¡œ ì—°ê²° ì‹œë„
+            connectionInfoText.text = "ì„œë²„ì™€ ì—°ê²°ë˜ì§€ ì•ŠìŒ\nì ‘ì† ì‹œë„ ì¤‘";
+            PhotonNetwork.ConnectUsingSettings();
+        }       
+               
+    }
+
+    public override void OnCreatedRoom()
+    {
+        base.OnCreatedRoom();
+
+        Debug.Log("04. ë°© ìƒì„± ì™„ë£Œ");        
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        //(ë¹ˆ ë°©ì´ ì—†ì–´)ëœë¤ ë£¸ ì°¸ê°€ì— ì‹¤íŒ¨í•œ ê²½ìš° ìë™ ì‹¤í–‰
+        Debug.Log("03. ë¹„ì–´ìˆëŠ” ë°© ì—†ìŒ. ìƒˆë¡œìš´ ë°© ìƒì„±");
+
+        connectionInfoText.text = "ìƒˆë¡œìš´ ë°©ì„ ìƒì„±í•©ë‹ˆë‹¤.";
+
+        //ë£¸ ì†ì„± ì„¤ì •
+        RoomOptions options = new RoomOptions();
+        options.IsOpen = true;
+        options.IsVisible = true;
+        options.MaxPlayers = 4;
+
+        string roomId = "Room" + Random.Range(1, 100);
+
+        //ìƒˆë¡œìš´ ë£¸ ìƒì„±
+        //ìƒì„±í•  ë£¸ ì´ë¦„ì„ string íƒ€ì…, ë£¹ ì˜µì…˜ì„ RoomOptions íƒ€ì…ìœ¼ë¡œ ë°›ëŠ”ë‹¤
+        //ìƒì„±ëœ ë£¸ì€ ë¦¬ìŠ¨ ì„œë²„ ë°©ì‹ìœ¼ë¡œ ë™ì‘í•˜ë©° ë£¸ì„ ìƒì„±í•œ í´ë¼ì´ì–¸íŠ¸ê°€ í˜¸ìŠ¤íŠ¸ ì—­í• ì„ ë§¡ëŠ”ë‹¤
+        PhotonNetwork.CreateRoom(roomId, options);
     }
        
     public override void OnJoinedRoom()
     {
-        //·ë¿¡ Âü°¡ ¿Ï·áµÈ °æ¿ì ÀÚµ¿ ½ÇÇà
-        Debug.Log(PhotonNetwork.NickName + "¹æ ÀÔÀå ¿Ï·á");
+        //ë£¸ì— ì°¸ê°€ ì™„ë£Œëœ ê²½ìš° ìë™ ì‹¤í–‰
+        Debug.Log("05. ë°© ì…ì¥ ì™„ë£Œ");
 
-        //ÇÃ·¹ÀÌ¾îÀÇ ´Ğ³×ÀÓ ¼³Á¤
+        //í”Œë ˆì´ì–´ì˜ ë‹‰ë„¤ì„ ì„¤ì •
         PhotonNetwork.NickName = userName.text;
-        connectionInfoText.text = PhotonNetwork.NickName + " ÀÔÀåÇÏ¼Ì½À´Ï´Ù.";
+        connectionInfoText.text = PhotonNetwork.NickName + " ì…ì¥í•˜ì…¨ìŠµë‹ˆë‹¤.";
 
-        //·ë Âü°¡ÀÚ ¸ğµÎ°¡ ÇØ´ç ¾ÀÀ» ·ÎµåÇÏ°Ô ÇÔ
+        //ë£¸ ì°¸ê°€ì ëª¨ë‘ê°€ í•´ë‹¹ ì”¬ì„ ë¡œë“œí•˜ê²Œ í•¨
         //PhotonNetwork.LoadLevel("Main");
+    }
+        
+
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
+    {
+        //ë¡œë¹„ì— ì ‘ì†í•˜ë©´ ìë™ìœ¼ë¡œ ì½œë°±
+        //ë£¸ ë¦¬ìŠ¤íŠ¸ì— ë³€í™”(ë£¸ ìƒì„±, ë£¸ ì œê±°, ë£¸ ì†ì„± ë³€ê²½ ë“±)ê°€ ìˆì„ ë•Œ ë§ˆë‹¤ ìë™ìœ¼ë¡œ ì½œë°±
+        Debug.Log("ë£¸ ë¦¬ìŠ¤íŠ¸ ì—…ë°ì´íŠ¸ - í˜„ì¬ ë°© ê°¯ìˆ˜ : " + roomList.Count);
+        UpdateRoomList(roomList);
+        
+    }
+
+    private void UpdateRoomList(List<RoomInfo> roomList)
+    {
+        //ë£¸ ë¦¬ìŠ¤íŠ¸ì˜ ëª¨ë“  ìš”ì†Œ ì‚­ì œ
+        foreach(RoomData room in roomDataList)
+        {
+            Destroy(room.gameObject);
+        }
+
+        //ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        roomDataList.Clear();
+
+        //í˜„ì¬ ì‚¬ìš© ê°€ëŠ¥í•œ ê° ë°©ì— ëŒ€í•´ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ë§Œë“¤ê³  ë¦¬ìŠ¤íŠ¸ ì¶”ê°€
+        foreach(RoomInfo room in roomList)
+        {
+            RoomData newRoom = Instantiate(roomPrefab, scrollArea);
+            //newRoom.SetRoomName(room.Name);
+            newRoom.SetupRoom(room.Name, room.PlayerCount, room.MaxPlayers);
+            roomDataList.Add(newRoom);
+        }
     }
 }
