@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Looby.unity
     guid: 900cbe1fe4f4ccc47a41c2a1a2f5267c
+  - enabled: 1
+    path: Assets/Scenes/Main.unity
+    guid: aa1476fe66e77c54d8aa54867ff7c950
   m_configObjects: {}

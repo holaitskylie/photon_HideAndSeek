@@ -165,8 +165,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         PhotonNetwork.NickName = userName.text;
         connectionInfoText.text = PhotonNetwork.NickName + " 입장하셨습니다.";
 
-        //룸 참가자 모두가 해당 씬을 로드하게 함
+        //룸 참가자가 해당 씬을 로드하게 함
         PhotonNetwork.LoadLevel("Main");
+        GameManager.instance.InitPlayer();
     }
 
     public void JoinRoom(string roomName)
