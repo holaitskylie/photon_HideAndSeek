@@ -587,6 +587,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 251460376545f2846a6ab61160879ddd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pv: {fileID: 55329574}
+  playerPrefab: {fileID: 6472052111265179696, guid: c47f97e09830ff349b8f885a17978deb, type: 3}
+  isConnected: 0
 --- !u!4 &55329573
 Transform:
   m_ObjectHideFlags: 0
@@ -621,7 +624,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents: []
-  sceneViewId: 1
+  sceneViewId: 999
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!1001 &62671643

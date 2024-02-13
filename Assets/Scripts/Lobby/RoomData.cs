@@ -1,3 +1,4 @@
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,11 +8,11 @@ public class RoomData : MonoBehaviour
 {
     LobbyManager lobbyManager;
     public Text roomInfoText;
-
+   
     private void Start()
     {
         lobbyManager = FindObjectOfType<LobbyManager>();
-    }
+    }   
 
     public void SetupRoom(string roomName, int currPlayer, int maxPlayer)
     {

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using Photon.Pun.Demo.PunBasics;
 
 //<summary>
 //Lobby Scene이 네트워크 로비로 동작하는 스크립트
@@ -11,6 +12,8 @@ using Photon.Realtime;
 //</summary>
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
+    public static LobbyManager instance;
+
     private string gameVersion = "v1.0";
 
     [Header("UI_Naming")]
@@ -25,6 +28,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     [SerializeField] private Transform scrollArea;
     List<RoomData> roomDataList = new List<RoomData>();
 
+    private void Awake()
+    {      
+        if(instance == null )
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
@@ -37,9 +52,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         //게임 서버 접속
         PhotonNetwork.ConnectUsingSettings();
                 
+        connectionInfoText.text = "서버 접속 중";
+
         //접속하는 동안 룸 접속을 시도할 수 없도록 접속 버튼 비활성화
         createButton.interactable = false;
-        connectionInfoText.text = "서버 접속 중";
 
     }
 
@@ -48,7 +64,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         //클라이언트가 마스터 서버에 연결되며 매치메이킹 작업을 수행할 준비가 되면 자동 호출
         Debug.Log("02. 포톤 서버 접속 성공");
 
-        createButton.interactable = true;
+        PhotonNetwork.AutomaticallySyncScene = true;
+        
         connectionInfoText.text = "서버에 연결됨";
 
         //로비에 접속
@@ -58,6 +75,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("03. 로비 접속");
+        createButton.interactable = true;
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -97,8 +115,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public void MakeRoom()
     {
-        //createButton에 연결하여 로비에 방을 생성하는 메서드
+        //createButton에 연결하여 로비에 방을 생성하는 메서드        
         Debug.Log("03. 방 생성하기");
+
+        if (string.IsNullOrEmpty(userName.text))
+            return;        
+
         createButton.interactable = false;
 
         //룸 속성 설정
@@ -159,16 +181,15 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         //룸에 참가 완료된 경우 자동 실행
-        Debug.Log("05. 방 입장 완료");        
+        Debug.Log("05. 방 입장 완료" + PhotonNetwork.CurrentRoom.Name);        
 
         //플레이어의 닉네임 설정
-        PhotonNetwork.NickName = userName.text;
-        connectionInfoText.text = PhotonNetwork.NickName + " 입장하셨습니다.";
+        PhotonNetwork.NickName = userName.text;        
 
         //룸 참가자가 해당 씬을 로드하게 함
-        PhotonNetwork.LoadLevel("Main");
-        GameManager.instance.InitPlayer();
-    }
+        PhotonNetwork.LoadLevel("Main");   
+        
+    }   
 
     public void JoinRoom(string roomName)
     {
